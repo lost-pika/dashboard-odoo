@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="marketplace_dashboard.Dashboard" owl="1">
+        <div class="o_marketplace_dashboard h-100 bg-light overflow-auto w-100" style="min-height: 100vh; position: relative;">
+            
+            <input type="file" t-ref="fileInput" class="d-none" t-on-change="onFileChange" accept=".xlsx, .xls, .csv"/>
+
+            <div t-if="state.showConfigModal || state.showUploadModal" 
+                 style="position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
+                
+                <div t-if="state.showConfigModal" class="card shadow-lg border-0" style="width: 100%; max-width: 600px; border-radius: 12px; overflow: hidden;">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center p-4 border-bottom">
+                        <h5 class="fw-bold mb-0">Generate Dashboard with AI</h5>
+                        <button class="btn-close" t-on-click="closeModals"></button>
+                    </div>
+                    <div class="card-body p-4 bg-light">
+                        <div class="row g-3">
+                            <div class="col-12 mb-2">
+                                <label class="small fw-bold text-muted mb-1">Dashboard Name</label>
+                                <input type="text" class="form-control border-0 shadow-sm p-2" t-model="state.newConfig.name"/>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-4 gap-2">
+                            <button class="btn btn-outline-secondary px-4 bg-white" t-on-click="closeModals">Cancel</button>
+                            <button class="btn btn-primary px-4" style="background-color: #5fa4a6; border:none;" t-on-click="goToUpload">Continue</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div t-if="state.showUploadModal" class="card shadow-lg border-0 p-5 text-center" style="width: 100%; max-width: 500px; border-radius: 12px;">
+                    <div class="d-flex justify-content-end w-100 mb-2" t-if="!state.isGenerating">
+                        <button class="btn-close" t-on-click="closeModals"></button>
+                    </div>
+                    
+                    <t t-if="!state.isGenerating">
+                        <h4 class="fw-bold mb-4" style="color: #1e293b;">Upload Dataset</h4>
+                        <div class="border border-2 border-dashed rounded p-5 mb-4" style="cursor: pointer; background: #f8fafc; border-color: #cbd5e1;" t-on-click="triggerFileInput">
+                            <i class="fa fa-cloud-upload fa-4x mb-3" style="color: #5fa4a6;"/>
+                            <h5 class="fw-semibold text-dark">Drag &amp; drop file here</h5>
+                            <p class="text-muted small">or click to browse</p>
+                        </div>
+                    </t>
+
+                    <t t-if="state.isGenerating">
+                        <div class="py-5">
+                            <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: #5fa4a6;" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <h4 class="fw-bold" style="color: #1e293b;">Gemini AI is analyzing...</h4>
+                            <p class="text-muted small mt-2">Reading your dataset and generating KPIs specific to <t t-esc="state.newConfig.name"/>.</p>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <t t-if="state.currentView === 'landing'">
+                <div class="container-fluid px-5 py-4 w-100">
+                    
+                    <t t-if="state.savedDashboards.length > 0 || state.draftCharts.length > 0">
+                        <div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 p-4 text-white shadow-sm" style="background-color: #5fa4a6;">
+            <div>
+                <h1 class="mb-0 fw-bold" t-esc="state.savedDashboards.length"/>
+                <p class="mb-0 small opacity-75">All Dashboards</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 p-4 text-white shadow-sm" style="background-color: #2b3648;">
+            <div>
+                <h1 class="mb-0 fw-bold" t-esc="state.draftCharts.length"/>
+                <p class="mb-0 small opacity-75">All Charts (Drafts)</p>
+            </div>
+        </div>
+    </div>
+</div>
+                        <hr class="mb-4" style="border-color: #cbd5e1;"/>
+                    </t>
+
+                    <t t-if="state.currentView === 'landing' and state.savedDashboards.length > 0">
+    <h4 class="fw-bold text-dark mb-4">Your Saved Dashboards</h4>
+    <div class="row g-4 mb-5">
+        <t t-foreach="state.savedDashboards" t-as="db" t-key="db.id">
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <div class="card border-0 bg-white p-3 shadow-sm" style="border-radius: 10px;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="fw-bold text-dark mb-3" t-esc="db.name"/>
+                        <button class="btn btn-link text-danger p-0" t-on-click="() => this.deleteSavedDashboard(db.id)">
+                            <i class="fa fa-trash"/>
+                        </button>
+                    </div>
+                    <button class="btn btn-primary w-100" style="background-color: #5fa4a6; border: none;" t-on-click="() => this.viewDashboard(db)">
+                        View Dashboard
+                    </button>
+                </div>
+            </div>
+        </t>
+    </div>
+    <hr class="mb-5" style="border-color: #cbd5e1;"/>
+</t>
+
+                    <h4 class="fw-bold text-dark mb-4">Choose a Template</h4>
+
+                    <div class="row g-4">
+                        <t t-foreach="state.templates" t-as="tpl" t-key="tpl.id">
+                            <div class="col-md-6 col-lg-4 col-xl-3">
+                                <div class="card border-0 bg-white p-3 template-card shadow-sm" t-on-click="() => this.openConfigModal(tpl)" style="cursor: pointer; border-radius: 10px;">
+                                    
+                                    <div class="thumb-wrapper">
+                                        <div class="thumb-kpi-row">
+                                            <div class="thumb-kpi" t-attf-style="background: {{tpl.id % 2 === 0 ? '#5fa4a6' : '#2b3648'}};"></div>
+                                            <div class="thumb-kpi" style="background: #84babb;"></div>
+                                            <div class="thumb-kpi" t-attf-style="background: {{tpl.id % 3 === 0 ? '#2b3648' : '#e2e8f0'}};"></div>
+                                        </div>
+                                        <div class="thumb-chart-row">
+                                            <div class="thumb-bar-chart">
+                                                <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 15) % 60 + 20}}%;"></div>
+                                                <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 25) % 70 + 30}}%;"></div>
+                                                <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 35) % 80 + 10}}%;"></div>
+                                                <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 10) % 90 + 10}}%;"></div>
+                                                <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 40) % 60 + 40}}%;"></div>
+                                            </div>
+                                            <div class="thumb-pie-chart" t-attf-style="background: conic-gradient(#2b3648 0% {{(tpl.id * 10) % 40 + 20}}%, #5fa4a6 {{(tpl.id * 10) % 40 + 20}}% {{(tpl.id * 20) % 30 + 60}}%, #e1e5eb {{(tpl.id * 20) % 30 + 60}}% 100%);"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-dark" t-esc="tpl.name"/>
+                                            <span class="text-muted small" t-esc="tpl.charts + ' Pre-configured Charts'"/>
+                                        </div>
+                                        <button class="btn btn-sm btn-light rounded-circle"><i class="fa fa-arrow-right text-muted"/></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+            
+            <t t-if="state.currentView === 'dashboard'">
+                <div class="d-flex justify-content-between align-items-center p-3 bg-white shadow-sm sticky-top w-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-light rounded-circle" t-on-click="goHome"><i class="fa fa-arrow-left"/></button>
+                        <h4 class="mb-0 fw-bold" t-esc="state.activeDashboardName"/>
+                    </div>
+                    <div class="header_actions d-flex gap-2">
+                        <button class="btn btn-danger px-3" t-on-click="() => state.activeDashboardId ? this.deleteSavedDashboard(state.activeDashboardId) : this.deleteDashboard()">
+    <i class="fa fa-trash"/> Delete
+</button>
+                        <button class="btn btn-outline-secondary px-4" t-on-click="toggleEditMode">
+                            <i t-attf-class="fa {{state.isEditMode ? 'fa-eye' : 'fa-pencil'}} me-2"/>
+                            <t t-if="state.isEditMode">Preview</t><t t-else="">Edit Layout</t>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="container-fluid px-5 py-4 w-100">
+                    <div class="row g-4 mb-4">
+                        <t t-foreach="state.kpis" t-as="kpi" t-key="kpi.id">
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm text-white h-100" t-attf-style="background-color: {{kpi.color}}; border-radius: 12px;">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between">
+                                            <p class="mb-0 fw-semibold opacity-75 text-uppercase" t-esc="kpi.title"/>
+                                            <i t-attf-class="fa {{kpi.icon}} fa-lg opacity-50"/>
+                                        </div>
+                                        <h2 class="fw-bold my-2" t-esc="kpi.value"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div class="row g-4">
+                        <div t-attf-class="{{state.isEditMode ? 'col-lg-8' : 'col-lg-12'}} transition-all">
+                            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 12px; min-height: 450px;">
+                                <h5 class="fw-bold mb-4" style="color: #2c3e50;">Primary Visualization</h5>
+                                <div class="chart-container" style="position: relative; height: 350px;">
+                                    <canvas t-ref="salesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div t-if="state.isEditMode" class="col-lg-4">
+                            <div class="card border-0 shadow-sm p-4 text-white h-100" style="border-radius: 12px; background-color: #364554;">
+                                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-4">
+                                    <h5 class="fw-bold mb-0">Widget Settings</h5>
+                                    <button class="btn-close btn-close-white" t-on-click="toggleEditMode"></button>
+                                </div>
+                                <button class="btn btn-primary w-100 mt-auto fw-bold" style="background-color: #5fa4a6; border: none;" t-on-click="applyChanges">
+                                    Apply Changes &amp; Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>
