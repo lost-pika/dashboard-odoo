@@ -1,27 +1,27 @@
-from odoo import models, fields
+# from odoo import models, fields
 
 
-class MarketplaceDashboard(models.Model):
-    _name = 'marketplace.dashboard'
-    _description = 'Marketplace Dashboard'
+# class MarketplaceDashboard(models.Model):
+#     _name = 'marketplace.dashboard'
+#     _description = 'Marketplace Dashboard'
 
-    name = fields.Char(string="Dashboard Name")
+#     name = fields.Char(string="Dashboard Name")
 
 
-class MarketplaceDashboardWidget(models.Model):
-    _name = "marketplace.dashboard.widget"
-    _description = "Dashboard Widget"
+# class MarketplaceDashboardWidget(models.Model):
+#     _name = "marketplace.dashboard.widget"
+#     _description = "Dashboard Widget"
 
-    dashboard_id = fields.Many2one("marketplace.dashboard")
+#     dashboard_id = fields.Many2one("marketplace.dashboard")
 
-    name = fields.Char()
+#     name = fields.Char()
 
-    widget_type = fields.Selection([
-        ('kpi','KPI'),
-        ('chart','Chart'),
-        ('table','Table')
-    ])
+#     widget_type = fields.Selection([
+#         ('kpi','KPI'),
+#         ('chart','Chart'),
+#         ('table','Table')
+#     ])
 
-    model_name = fields.Char()
-    metric = fields.Char()
-    group_by = fields.Char()
+#     model_name = fields.Char()
+#     metric = fields.Char()
+#     group_by = fields.Char()

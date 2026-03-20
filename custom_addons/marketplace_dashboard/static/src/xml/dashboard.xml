@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-
     <t t-name="marketplace_dashboard.Dashboard" owl="1">
         <div class="o_marketplace_dashboard h-100 bg-light overflow-auto w-100" style="min-height: 100vh; position: relative;">
-            
             <input type="file" t-ref="fileInput" class="d-none" t-on-change="onFileChange" accept=".xlsx, .xls, .csv"/>
-
             <div t-if="state.showConfigModal || state.showUploadModal" 
                  style="position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
-                
                 <div t-if="state.showConfigModal" class="card shadow-lg border-0" style="width: 100%; max-width: 600px; border-radius: 12px; overflow: hidden;">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center p-4 border-bottom">
                         <h5 class="fw-bold mb-0">Generate Dashboard with AI</h5>
@@ -27,12 +23,10 @@
                         </div>
                     </div>
                 </div>
-
                 <div t-if="state.showUploadModal" class="card shadow-lg border-0 p-5 text-center" style="width: 100%; max-width: 500px; border-radius: 12px;">
                     <div class="d-flex justify-content-end w-100 mb-2" t-if="!state.isGenerating">
                         <button class="btn-close" t-on-click="closeModals"></button>
                     </div>
-                    
                     <t t-if="!state.isGenerating">
                         <h4 class="fw-bold mb-4" style="color: #1e293b;">Upload Dataset</h4>
                         <div class="border border-2 border-dashed rounded p-5 mb-4" style="cursor: pointer; background: #f8fafc; border-color: #cbd5e1;" t-on-click="triggerFileInput">
@@ -41,73 +35,91 @@
                             <p class="text-muted small">or click to browse</p>
                         </div>
                     </t>
-
                     <t t-if="state.isGenerating">
                         <div class="py-5">
                             <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: #5fa4a6;" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
                             <h4 class="fw-bold" style="color: #1e293b;">Gemini AI is analyzing...</h4>
-                            <p class="text-muted small mt-2">Reading your dataset and generating KPIs specific to <t t-esc="state.newConfig.name"/>.</p>
+                            <p class="text-muted small mt-2">Reading your dataset and generating KPIs specific to
+                                <t t-esc="state.newConfig.name"/>.
+                            </p>
                         </div>
                     </t>
                 </div>
             </div>
-
             <t t-if="state.currentView === 'landing'">
-                <div class="container-fluid px-5 py-4 w-100">
-                    
-                    <t t-if="state.savedDashboards.length > 0 || state.draftCharts.length > 0">
-                        <div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card border-0 p-4 text-white shadow-sm" style="background-color: #5fa4a6;">
-            <div>
-                <h1 class="mb-0 fw-bold" t-esc="state.savedDashboards.length"/>
-                <p class="mb-0 small opacity-75">All Dashboards</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 p-4 text-white shadow-sm" style="background-color: #2b3648;">
-            <div>
-                <h1 class="mb-0 fw-bold" t-esc="state.draftCharts.length"/>
-                <p class="mb-0 small opacity-75">All Charts (Drafts)</p>
-            </div>
-        </div>
-    </div>
-</div>
-                        <hr class="mb-4" style="border-color: #cbd5e1;"/>
-                    </t>
-
-                    <t t-if="state.currentView === 'landing' and state.savedDashboards.length > 0">
-    <h4 class="fw-bold text-dark mb-4">Your Saved Dashboards</h4>
-    <div class="row g-4 mb-5">
-        <t t-foreach="state.savedDashboards" t-as="db" t-key="db.id">
-            <div class="col-md-6 col-lg-4 col-xl-3">
-                <div class="card border-0 bg-white p-3 shadow-sm" style="border-radius: 10px;">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h6 class="fw-bold text-dark mb-3" t-esc="db.name"/>
-                        <button class="btn btn-link text-danger p-0" t-on-click="() => this.deleteSavedDashboard(db.id)">
-                            <i class="fa fa-trash"/>
-                        </button>
+                <div class="container-fluid px-5 py-4">
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 15px;">
+                                <div class="p-4 d-flex justify-content-between align-items-center cursor-pointer" style="background-color: #5fa4a6; color: white;" t-on-click="() => state.showSavedList = !state.showSavedList">
+                                    <div>
+                                        <h2 class="fw-bold mb-0" t-esc="state.savedDashboards.length"/>
+                                        <p class="mb-0 opacity-75 text-uppercase small fw-bold">All Dashboards (Published)</p>
+                                    </div>
+                                    <i t-attf-class="fa fa-chevron-{{state.showSavedList ? 'up' : 'down'}} fa-2x opacity-50"/>
+                                </div>
+                                <div t-if="state.showSavedList" class="p-3 bg-white border-top">
+                                    <div class="list-group list-group-flush">
+                                        <t t-foreach="state.savedDashboards" t-as="db" t-key="db.id">
+                                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-3 rounded mb-1 bg-light">
+                                                <span class="fw-bold text-dark" t-esc="db.name"/>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-sm btn-primary" style="background:#5fa4a6; border:none;" t-on-click="() => this.viewDashboard(db)">Open</button>
+                                                    <button class="btn btn-sm btn-outline-danger border-0" t-on-click="(ev) => this.deleteSavedDashboard(ev, db.id)">
+                                                        <i class="fa fa-trash"/>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 15px;">
+                                <div class="p-4 d-flex justify-content-between align-items-center cursor-pointer" style="background-color: #64748b; color: white;" t-on-click="() => state.showDraftList = !state.showDraftList">
+                                    <div>
+                                        <h2 class="fw-bold mb-0" t-esc="state.draftCharts.length"/>
+                                        <p class="mb-0 opacity-75 text-uppercase small fw-bold">All Charts (Drafts)</p>
+                                    </div>
+                                    <i t-attf-class="fa fa-chevron-{{state.showDraftList ? 'up' : 'down'}} fa-2x opacity-50"/>
+                                </div>
+                                <div t-if="state.showDraftList" class="p-3 bg-white border-top">
+                                    <div class="list-group list-group-flush">
+                                        <t t-foreach="state.draftCharts" t-as="draft" t-key="draft.id">
+                                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-2 py-3 rounded mb-1 bg-light">
+                                                <span class="text-muted fw-bold" t-esc="draft.name"/>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-sm btn-dark" t-on-click="() => this.resumeEdit(draft)">Resume</button>
+                                                    <button class="btn btn-sm btn-outline-danger border-0" t-on-click="(ev) => this.deleteSavedDashboard(ev, draft.id)">
+                                                        <i class="fa fa-trash"/>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn btn-primary w-100" style="background-color: #5fa4a6; border: none;" t-on-click="() => this.viewDashboard(db)">
-                        View Dashboard
-                    </button>
-                </div>
-            </div>
-        </t>
-    </div>
-    <hr class="mb-5" style="border-color: #cbd5e1;"/>
-</t>
-
-                    <h4 class="fw-bold text-dark mb-4">Choose a Template</h4>
-
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold text-dark mb-0">Choose a Template</h4>
+                        <div class="d-flex gap-2">
+                            <div class="position-relative">
+                                <i class="fa fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"/>
+                                <input type="text" class="form-control ps-5 border-0 shadow-sm" placeholder="Search templates..." t-model="state.templateSearchTerm" style="border-radius: 20px; width: 250px;"/>
+                            </div>
+                            <button class="btn btn-white shadow-sm border" t-on-click="() => state.showSettings = true">
+                                <i class="fa fa-key me-2 text-primary"/> API Settings
+                            </button>
+                        </div>
+                    </div>
                     <div class="row g-4">
-                        <t t-foreach="state.templates" t-as="tpl" t-key="tpl.id">
+                        <t t-foreach="filteredTemplates" t-as="tpl" t-key="tpl.id">
                             <div class="col-md-6 col-lg-4 col-xl-3">
-                                <div class="card border-0 bg-white p-3 template-card shadow-sm" t-on-click="() => this.openConfigModal(tpl)" style="cursor: pointer; border-radius: 10px;">
-                                    
+                                <div class="card border-0 bg-white p-3 template-card shadow-sm h-100" t-on-click="() => this.openConfigModal(tpl)" style="cursor: pointer; border-radius: 10px;">
                                     <div class="thumb-wrapper">
                                         <div class="thumb-kpi-row">
                                             <div class="thumb-kpi" t-attf-style="background: {{tpl.id % 2 === 0 ? '#5fa4a6' : '#2b3648'}};"></div>
@@ -119,44 +131,70 @@
                                                 <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 15) % 60 + 20}}%;"></div>
                                                 <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 25) % 70 + 30}}%;"></div>
                                                 <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 35) % 80 + 10}}%;"></div>
-                                                <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 10) % 90 + 10}}%;"></div>
                                                 <div class="thumb-bar" t-attf-style="height: {{(tpl.id * 40) % 60 + 40}}%;"></div>
                                             </div>
                                             <div class="thumb-pie-chart" t-attf-style="background: conic-gradient(#2b3648 0% {{(tpl.id * 10) % 40 + 20}}%, #5fa4a6 {{(tpl.id * 10) % 40 + 20}}% {{(tpl.id * 20) % 30 + 60}}%, #e1e5eb {{(tpl.id * 20) % 30 + 60}}% 100%);"></div>
                                         </div>
                                     </div>
-
                                     <div class="d-flex justify-content-between align-items-center mt-3">
                                         <div>
                                             <h6 class="fw-bold mb-1 text-dark" t-esc="tpl.name"/>
                                             <span class="text-muted small" t-esc="tpl.charts + ' Pre-configured Charts'"/>
                                         </div>
-                                        <button class="btn btn-sm btn-light rounded-circle"><i class="fa fa-arrow-right text-muted"/></button>
+                                        <button class="btn btn-sm btn-light rounded-circle">
+                                            <i class="fa fa-arrow-right text-muted"/>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </t>
                     </div>
+                    <div t-if="state.showSettings" class="modal d-block" style="background: rgba(15, 23, 42, 0.7); z-index: 10000; backdrop-filter: blur(4px);">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                                <div class="modal-header border-0 p-4 pb-0">
+                                    <h5 class="fw-bold mb-0">Gemini API Setup</h5>
+                                    <button class="btn-close" t-on-click="() => state.showSettings = false"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <p class="small text-muted mb-3">Your key is stored locally. Get it from:
+                                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-decoration-none fw-bold">Google AI Studio</a>.
+                                    </p>
+                                    <div class="mb-3">
+                                        <label class="small fw-bold text-muted mb-1">API Key</label>
+                                        <input type="password" class="form-control border-2" t-model="state.userApiKey" placeholder="AIza..."/>
+                                    </div>
+                                    <button class="btn btn-primary w-100 py-2 fw-bold" style="background: #5fa4a6; border: none;" t-on-click="saveUserKey">Save Configuration</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </t>
-            
             <t t-if="state.currentView === 'dashboard'">
                 <div class="d-flex justify-content-between align-items-center p-3 bg-white shadow-sm sticky-top w-100">
                     <div class="d-flex align-items-center gap-3">
-                        <button class="btn btn-light rounded-circle" t-on-click="goHome"><i class="fa fa-arrow-left"/></button>
+                        <button class="btn btn-light rounded-circle" t-on-click="goHome">
+                            <i class="fa fa-arrow-left"/>
+                        </button>
                         <h4 class="mb-0 fw-bold" t-esc="state.activeDashboardName"/>
                     </div>
                     <div class="header_actions d-flex gap-2">
-                        <button class="btn btn-danger px-3" t-on-click="() => state.activeDashboardId ? this.deleteSavedDashboard(state.activeDashboardId) : this.deleteDashboard()">
-    <i class="fa fa-trash"/> Delete
-</button>
+                        <button class="btn btn-danger px-3" t-on-click="(ev) => this.deleteSavedDashboard(ev, state.activeDashboardId)">
+                            <i class="fa fa-trash"/> Delete
+                        </button>
                         <button class="btn btn-outline-secondary px-4" t-on-click="toggleEditMode">
                             <i t-attf-class="fa {{state.isEditMode ? 'fa-eye' : 'fa-pencil'}} me-2"/>
-                            <t t-if="state.isEditMode">Preview</t><t t-else="">Edit Layout</t>
+                            <t t-esc="state.isEditMode ? 'Preview' : 'Edit Layout'"/>
+                        </button>
+                        <!-- <button class="btn btn-success px-3" t-on-click="exportToExcel" t-if="state.rawRecords.length > 0">
+                            <i class="fa fa-file-excel-o me-2"/> Export Data
+                        </button> -->
+                        <button class="btn btn-outline-secondary px-3" t-on-click="toggleDarkMode">
+                            <i t-attf-class="fa {{state.isDarkMode ? 'fa-sun-o' : 'fa-moon-o'}}"/>
                         </button>
                     </div>
                 </div>
-
                 <div class="container-fluid px-5 py-4 w-100">
                     <div class="row g-4 mb-4">
                         <t t-foreach="state.kpis" t-as="kpi" t-key="kpi.id">
@@ -173,7 +211,6 @@
                             </div>
                         </t>
                     </div>
-
                     <div class="row g-4">
                         <div t-attf-class="{{state.isEditMode ? 'col-lg-8' : 'col-lg-12'}} transition-all">
                             <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 12px; min-height: 450px;">
@@ -183,16 +220,70 @@
                                 </div>
                             </div>
                         </div>
-
                         <div t-if="state.isEditMode" class="col-lg-4">
-                            <div class="card border-0 shadow-sm p-4 text-white h-100" style="border-radius: 12px; background-color: #364554;">
-                                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-4">
-                                    <h5 class="fw-bold mb-0">Widget Settings</h5>
-                                    <button class="btn-close btn-close-white" t-on-click="toggleEditMode"></button>
+                            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; background-color: #ffffff; border: 1px solid #e2e8f0; overflow: hidden;">
+                                <div class="p-4 border-bottom d-flex justify-content-between align-items-center" style="background: #f8fafc;">
+                                    <div>
+                                        <h5 class="fw-bold mb-0" style="color: #1e293b;">Widget Settings</h5>
+                                        <span class="small text-muted">Configure your visualization</span>
+                                    </div>
+                                    <button class="btn-close" t-on-click="toggleEditMode"></button>
                                 </div>
-                                <button class="btn btn-primary w-100 mt-auto fw-bold" style="background-color: #5fa4a6; border: none;" t-on-click="applyChanges">
-                                    Apply Changes &amp; Save
-                                </button>
+                                <div class="card-body p-4">
+                                    <div class="mb-4">
+                                        <label class="small fw-bold text-uppercase text-muted mb-3 d-block tracking-wider">Chart Type</label>
+                                        <div class="row g-2">
+                                            <div class="col-4" t-on-click="() => { this.state.chartConfig.chart_type = 'bar'; this.renderChart(); }">
+                                                <div t-attf-class="p-2 border rounded text-center cursor-pointer {{state.chartConfig.chart_type === 'bar' ? 'border-primary bg-light text-primary' : 'bg-white text-muted'}}" style="transition: all 0.2s;">
+                                                    <i class="fa fa-bar-chart d-block mb-1"/>
+                                                    <span style="font-size: 10px; font-weight: 700;">BAR</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-4" t-on-click="() => { this.state.chartConfig.chart_type = 'line'; this.renderChart(); }">
+                                                <div t-attf-class="p-2 border rounded text-center cursor-pointer {{state.chartConfig.chart_type === 'line' ? 'border-primary bg-light text-primary' : 'bg-white text-muted'}}" style="transition: all 0.2s;">
+                                                    <i class="fa fa-line-chart d-block mb-1"/>
+                                                    <span style="font-size: 10px; font-weight: 700;">LINE</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-4" t-on-click="() => { this.state.chartConfig.chart_type = 'pie'; this.renderChart(); }">
+                                                <div t-attf-class="p-2 border rounded text-center cursor-pointer {{state.chartConfig.chart_type === 'pie' ? 'border-primary bg-light text-primary' : 'bg-white text-muted'}}" style="transition: all 0.2s;">
+                                                    <i class="fa fa-pie-chart d-block mb-1"/>
+                                                    <span style="font-size: 10px; font-weight: 700;">PIE</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="small fw-bold text-uppercase text-muted mb-2 d-block tracking-wider">Group By (X-Axis)</label>
+                                        <select class="form-select border-2 shadow-none py-2" style="border-radius: 8px; font-size: 14px;" t-on-change="(ev) => this.updateChartDimension(ev.target.value)">
+                                            <t t-foreach="state.availableColumns" t-as="col" t-key="col">
+                                                <option t-esc="col" t-att-selected="col === state.chartConfig.label_column"/>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="small fw-bold text-uppercase text-muted mb-2 d-block tracking-wider">Measure (Y-Axis)</label>
+                                        <select class="form-select border-2 shadow-none py-2" style="border-radius: 8px; font-size: 14px;" t-on-change="(ev) => this.updateChartMeasure(ev.target.value)">
+                                            <t t-foreach="state.availableColumns" t-as="col" t-key="col">
+                                                <option t-esc="col" t-att-selected="col === state.chartConfig.value_column"/>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="mt-4 p-3 rounded-3" style="background-color: #f0fdf4; border: 1px solid #bbf7d0;">
+                                        <p class="small mb-0" style="color: #166534;">
+                                            <i class="fa fa-magic me-2"/>
+                                            <strong>AI Note:</strong> Grouping by
+                                            <b>
+                                                <t t-esc="state.chartConfig.label_column"/>
+                                            </b> shows the best trend for this dataset.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="p-4 mt-auto border-top bg-light">
+                                    <button class="btn btn-primary w-100 fw-bold py-2 shadow-sm" style="background-color: #5fa4a6; border: none; border-radius: 8px;" t-on-click="applyChanges">
+                Save &amp; Publish Dashboard
+            </button>
+                                </div>
                             </div>
                         </div>
                     </div>
